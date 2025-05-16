@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.db.session import get_db
-from app.schemas.domain import DomainCreate, DomainUpdate, DomainResponse
-from app.crud.domain import create_domain, get_domain, get_domains, update_domain, delete_domain
-from app.events.producers.domain_created import publish_domain_created_event
+from db.session import get_db
+from schemas.domain import DomainCreate, DomainUpdate, DomainResponse
+from crud.domain import create_domain, get_domain, get_domains, update_domain, delete_domain
+from events.producers.domain_created import publish_domain_created_event
 
 router = APIRouter(prefix="/domains", tags=["domains"])
 

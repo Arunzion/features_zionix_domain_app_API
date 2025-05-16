@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Column, Integer, String, DateTime, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.db.session import Base
+from db.session import Base
 
 class Domain(Base):
     __tablename__ = "domains"
