@@ -2,9 +2,9 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from typing import List, Optional
 
-from models.application import Application
-from schemas.application import ApplicationCreate, ApplicationUpdate
-from crud.domain import get_domain_by_name
+from app.models.application import Application
+from app.schemas.application import ApplicationCreate, ApplicationUpdate
+from app.crud.domain import get_domain_by_name
 
 def get_application(db: Session, application_id: int) -> Optional[Application]:
     """Get an application by ID"""

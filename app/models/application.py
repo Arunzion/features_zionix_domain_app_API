@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Column, Integer, String, DateTime, Text, Foreign
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from db.session import Base
+from app.db.session import Base
 
 class Application(Base):
     __tablename__ = "applications"
@@ -11,7 +11,7 @@ class Application(Base):
     application_name = Column(String(100), index=True, nullable=False)  # Changed from `name` to `application_name`
     application_code = Column(String(50), unique=True, index=True, nullable=False)  # Added as `Application code`
     description = Column(Text, nullable=True)
-    is_active = Column(Boolean, default=True)  # Changed from `is_active` to `status`
+    status = Column(Boolean, default=True)  # Changed from `is_active` to `status`
     action = Column(String(50), nullable=True)  # Added `action` field
     domain_name = Column(String(100), ForeignKey("domains.domain_name"), nullable=False)  # Changed to `domain_name` as ForeignKey
     config = Column(Text, nullable=True)  # JSON stored as text

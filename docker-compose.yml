@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  admin_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: adminapi_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Arunnathan
+      POSTGRES_DB: admin_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
