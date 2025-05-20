@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional, Union
 from pydantic import AnyHttpUrl, validator, SecretStr
-from pydantic_settings import BaseSettings
+from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -21,9 +21,11 @@ class Settings(BaseSettings):
     
     # Database settings
     POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
+    POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))  # Default port is 5432
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "Arunnathan")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "admin_service")
+
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
