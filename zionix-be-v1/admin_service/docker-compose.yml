@@ -1,17 +1,13 @@
-version: "3.9"
-
 services:
   admin_service:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: adminapi_container
+    command: >
+      sh -c "until pg_isready -h db -p 5432; do sleep 2; done &&
+             alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
-    environment:
-      - PYTHONPATH=/admin_service/app  # Match Dockerfile setting
-    volumes:
-      - .:/admin_service  # Map the entire project directory
     depends_on:
       - db
     networks:
@@ -21,7 +17,6 @@ services:
     image: postgres:14
     container_name: postgres-db
     environment:
-      POSTGRES_SERVER: db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Arunnathan
       POSTGRES_DB: admin_service
@@ -34,7 +29,8 @@ services:
 
 volumes:
   postgres_data:
+    name: admin_service_postgres_data
 
 networks:
   custom_network:
-    driver: bridge
+    name: admin_service_network

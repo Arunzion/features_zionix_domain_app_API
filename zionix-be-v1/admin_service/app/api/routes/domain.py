@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-
 from app.db.session import get_db
 from app.schemas.domain import DomainCreate, DomainUpdate, DomainResponse
 from app.crud.domain import create_domain, get_domain, get_domains, update_domain, delete_domain
@@ -11,11 +10,23 @@ router = APIRouter(prefix="/domains", tags=["domains"])
 
 @router.post("/create_domain/", response_model=DomainResponse, status_code=status.HTTP_201_CREATED)
 async def create_new_domain(domain: DomainCreate, db: Session = Depends(get_db)):
-    """Create a new domain"""
+    """Create a new domain."""
+    # Create the domain in the database
     db_domain = create_domain(db=db, domain=domain)
-    # Publish domain created event
-    await publish_domain_created_event(domain_id=db_domain.id, domain_name=db_domain.domain_name)
-    return db_domain
+
+    # Ensure the response matches the DomainResponse model
+    return {
+        "id": db_domain.id,
+        "domain_name": db_domain.domain_name,
+        "domain_code": db_domain.domain_code,
+        "description": db_domain.description,
+        "status": db_domain.status,
+        "action": db_domain.action,
+        "created_at": db_domain.created_at,
+        "updated_at": db_domain.updated_at,
+    }
+
+
 
 @router.get("/get_domain/{domain_id}", response_model=DomainResponse)
 async def read_domain(domain_id: int, db: Session = Depends(get_db)):

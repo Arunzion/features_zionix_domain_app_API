@@ -1,8 +1,8 @@
 # FastAPI and ASGI server
-fastapi>=0.68.0,<0.69.0
+fastapi>=0.103.0,<1.0.0
 uvicorn>=0.15.0,<0.16.0
-pydantic>=1.8.0,<2.0.0 
-pydantic-settings>=0.2.1,<0.3.0  # For configuration management
+pydantic>=2.0.0,<3.0.0 
+pydantic-settings>=2.0.0,<3.0.0  # For configuration management
 
 # Database
 sqlalchemy>=1.4.0,<2.0.0
@@ -19,6 +19,6 @@ asyncpg>=0.23.0,<0.24.0
 #python-multipart>=0.0.5,<0.0.6
 
 # Utilities
-python-dotenv>=0.19.0,<0.20.0
+python-dotenv>=0.21.0,<1.0.0
 requests>=2.26.0,<2.27.0
 tenacity>=8.0.1,<8.1.0

@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from typing import List, Optional
-
 from app.models.domain import Domain
 from app.schemas.domain import DomainCreate, DomainUpdate
 
@@ -22,28 +21,32 @@ def get_domains(db: Session, skip: int = 0, limit: int = 100) -> List[Domain]:
     return db.query(Domain).offset(skip).limit(limit).all()
 
 def create_domain(db: Session, domain: DomainCreate) -> Domain:
-    """Create a new domain"""
-    # Check if domain code already exists
-    db_domain = get_domain_by_code(db, domain_code=domain.domain_code)
-    if db_domain:
+    """
+    Create a new domain.
+    """
+    # Check if the domain code already exists
+    existing_domain_by_code = db.query(Domain).filter(Domain.domain_code == domain.domain_code).first()
+    if existing_domain_by_code:
         raise HTTPException(status_code=400, detail="Domain code already registered")
     
-    # Check if domain name already exists
-    if get_domain_by_name(db, domain_name=domain.domain_name):
+    # Check if the domain name already exists
+    existing_domain_by_name = db.query(Domain).filter(Domain.domain_name == domain.domain_name).first()
+    if existing_domain_by_name:
         raise HTTPException(status_code=400, detail="Domain name already registered")
     
-    # Create new domain
-    db_domain = Domain(
+    # Create a new domain instance
+    new_domain = Domain(
         domain_name=domain.domain_name,
         domain_code=domain.domain_code,
         description=domain.description,
         status=domain.status,
         action=domain.action
     )
-    db.add(db_domain)
-    db.commit()
-    db.refresh(db_domain)
-    return db_domain
+    db.add(new_domain)
+    db.commit()  # Commit the transaction
+    db.refresh(new_domain)  # Refresh to get the updated state from DB
+    return new_domain
+
 
 def update_domain(db: Session, domain_id: int, domain: DomainUpdate) -> Domain:
     """Update a domain"""

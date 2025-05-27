@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional, Union
-from pydantic import AnyHttpUrl, validator, SecretStr
-from pydantic import BaseSettings
+from pydantic import AnyHttpUrl, validator, SecretStr,model_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -20,20 +20,23 @@ class Settings(BaseSettings):
         raise ValueError(v)
     
     # Database settings
-    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
-    POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))  # Default port is 5432
+    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "db")
+    POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "Arunnathan")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "admin_service")
 
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
 
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: Optional[str], values: dict) -> str:
-        if isinstance(v, str):
-            return v
-        return f"postgresql://{values.get('POSTGRES_USER')}:{values.get('POSTGRES_PASSWORD')}@{values.get('POSTGRES_SERVER')}/{values.get('POSTGRES_DB')}"
-    
+    @model_validator(mode="before")
+    @classmethod
+    def assemble_db_connection(cls, values):
+        if not values.get("SQLALCHEMY_DATABASE_URI"):
+            values["SQLALCHEMY_DATABASE_URI"] = (
+                f"postgresql://{values.get('POSTGRES_USER')}:{values.get('POSTGRES_PASSWORD')}"
+                f"@{values.get('POSTGRES_SERVER')}:{values.get('POSTGRES_PORT')}/{values.get('POSTGRES_DB')}"
+            )
+        return values
     # Kafka settings
     KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
     KAFKA_CONSUMER_GROUP: str = os.getenv("KAFKA_CONSUMER_GROUP", "admin-service")
@@ -46,6 +49,7 @@ class Settings(BaseSettings):
     
     class Config:
         case_sensitive = True
+        from_attributes = True
         env_file = ".env"
 
 settings = Settings()

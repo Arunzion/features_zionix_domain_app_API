@@ -1,4 +1,4 @@
-# Import all the models, so that Base has them before being imported by Alembic
+#Import all the models, so that Base has them before being imported by Alembic
 from app.db.session import Base
 from app.models.domain import Domain
 from app.models.application import Application

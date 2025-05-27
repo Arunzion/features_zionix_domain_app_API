@@ -1,30 +1,49 @@
 from fastapi import FastAPI
-#from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 import asyncio
+import logging
+from contextlib import asynccontextmanager
 from app.api.routes import domain, application
 from app.core.config import settings
 from app.db.session import engine
 from app.db.base import Base
-#from app.events.consumers import domain_events, application_events
+from app.db.session import init_db
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    try:
+        logger.info("Starting database initialization...")
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Startup error: {e}")
+        raise
+    
+    yield
+    
+    logger.info("Shutting down...")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Admin Service API for ZCare Platform",
     version="0.1.0",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan
 )
 
 # Set CORS middleware
-"""app.add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)"""
+)
 
 # Include routers
 app.include_router(domain.router, prefix=settings.API_V1_STR)
@@ -37,22 +56,6 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
-
-# Event consumers startup and shutdown
-"""
-@app.on_event("startup")
-async def startup_event_consumers():
-    # Start event consumers in background tasks
-    #asyncio.create_task(domain_events.start_consumer())
-    #asyncio.create_task(application_events.start_consumer())
-    app.state.event_consumers_running = True
-    print("Event consumers started")
-
-@app.on_event("shutdown")
-async def shutdown_event_consumers():
-    # Event consumers will be stopped when their tasks are cancelled
-    app.state.event_consumers_running = False
-    print("Event consumers stopped")"""
 
 if __name__ == "__main__":
     import uvicorn
