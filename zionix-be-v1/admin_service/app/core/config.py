@@ -24,27 +24,30 @@ class Settings(BaseSettings):
         raise ValueError(v)
     
     # Database settings
-    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "db")
-    POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))
+    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "Arunnathan")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "admin_service")
+    POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
 
-    PORT: int = int(os.getenv("PORT", "8000"))
-    RENDER: bool = os.getenv("RENDER", "False").lower() == "true"
-
-    SQLALCHEMY_DATABASE_URI: Optional[str] = None
-
-    @model_validator(mode="before")
+    @model_validator(mode='before')
     @classmethod
     def assemble_db_connection(cls, values):
-        if not values.get("SQLALCHEMY_DATABASE_URI"):
+        if values.get("ENV") == "production":
+            # Use Render internal PostgreSQL URL if available
+            values["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+            if values["SQLALCHEMY_DATABASE_URI"] and values["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
+                values["SQLALCHEMY_DATABASE_URI"] = values["SQLALCHEMY_DATABASE_URI"].replace("postgres://", "postgresql://", 1)
+        else:
+            # Local development database URL
             values["SQLALCHEMY_DATABASE_URI"] = (
-                f"postgresql://{values.get('POSTGRES_USER')}:{values.get('POSTGRES_PASSWORD')}"
-                f"@{values.get('POSTGRES_SERVER')}:{values.get('POSTGRES_PORT')}/{values.get('POSTGRES_DB')}"
+                f"postgresql://{values.get('POSTGRES_USER')}:"
+                f"{values.get('POSTGRES_PASSWORD')}@"
+                f"{values.get('POSTGRES_SERVER')}:"
+                f"{values.get('POSTGRES_PORT')}/"
+                f"{values.get('POSTGRES_DB')}"
             )
         return values
-    # Kafka settings
     KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
     KAFKA_CONSUMER_GROUP: str = os.getenv("KAFKA_CONSUMER_GROUP", "admin-service")
     
