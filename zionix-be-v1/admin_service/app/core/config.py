@@ -9,7 +9,11 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # CORS settings
-    CORS_ORIGINS: List[AnyHttpUrl] = []
+    CORS_ORIGINS: List[AnyHttpUrl] = [
+        "https://zcare-admin-service.onrender.com",
+        "http://localhost:3000",
+        "http://localhost:8000"
+    ]
 
     @validator("CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
@@ -25,6 +29,9 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "Arunnathan")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "admin_service")
+
+    PORT: int = int(os.getenv("PORT", "8000"))
+    RENDER: bool = os.getenv("RENDER", "False").lower() == "true"
 
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
 
