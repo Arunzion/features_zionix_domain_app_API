@@ -2,11 +2,15 @@ services:
   - type: web
     name: zcare-admin-service
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      pip install -r requirements.txt
+      alembic upgrade head
+    startCommand: gunicorn -c gunicorn_config.py app.main:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
+      - key: ENV
+        value: production
       - key: POSTGRES_DB
         fromDatabase:
           name: admin_service_db
